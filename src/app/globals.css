@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-primary: 15, 23, 42;
+  --background-secondary: 22, 31, 52;
+  --background-tertiary: 30, 41, 59;
+  --foreground: 248, 250, 252;
+  --accent-primary: 56, 189, 248;
+  --accent-secondary: 99, 102, 241;
+  --success: 34, 197, 94;
+  --warning: 234, 179, 8;
+  --error: 239, 68, 68;
+  --card-bg: 30, 41, 59;
+  --card-border: 51, 65, 85;
+  --muted: 148, 163, 184;
+}
+
+body {
+  color: rgb(var(--foreground));
+  background-color: rgb(var(--background-primary));
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-primary), 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(var(--accent-primary), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-primary), 0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse 2s infinite;
+}
+
+/* Card styling */
+.card {
+  @apply bg-slate-800/90 border border-slate-700/80 rounded-xl overflow-hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(var(--card-bg), 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--card-border), 0.15);
+}
+
+/* Button styling */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-sky-500 text-white hover:bg-sky-600 focus:ring-2 focus:ring-sky-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 focus:outline-none;
+}
+
+.btn-secondary {
+  @apply bg-slate-700 text-white hover:bg-slate-600 focus:ring-2 focus:ring-slate-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 focus:outline-none;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 focus:outline-none;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 focus:outline-none;
+}
+
+/* Badge styling */
+.badge {
+  @apply inline-flex items-center px-2 py-1 rounded-md text-xs font-medium;
+}
+
+.badge-primary {
+  @apply bg-sky-900/50 text-sky-100 border border-sky-800/20;
+}
+
+.badge-secondary {
+  @apply bg-slate-800/80 text-slate-300 border border-slate-700/20;
+}
+
+.badge-success {
+  @apply bg-green-900/50 text-green-100 border border-green-800/20;
+}
+
+.badge-danger {
+  @apply bg-red-900/50 text-red-100 border border-red-800/20;
+}
+
+/* Form styling */
+input,
+select,
+textarea {
+  @apply bg-slate-800/80 border border-slate-700/50 rounded-lg px-4 py-2 text-white 
+  focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-transparent;
+  transition: all 0.2s ease;
+}
+
+/* Custom scrollbar for Webkit browsers */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(var(--card-bg), 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--muted), 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--muted), 0.5);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--muted), 0.3) rgba(var(--card-bg), 0.3);
+}
+
+/* Comic container */
+@media (min-width: 1024px) {
+  .comic-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}
+
+/* Loading spinner */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(var(--accent-primary), 0.1);
+  border-radius: 50%;
+  border-top-color: rgb(var(--accent-primary));
+  animation: spin 0.8s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
