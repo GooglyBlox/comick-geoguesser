@@ -61,12 +61,152 @@ const GuessForm: React.FC<GuessFormProps> = ({
 
     const normalizedGuess = normalizeTitle(guess);
 
+    if (normalizedGuess.length < 4) {
+      setMessage({
+        text: "Your guess is too short. Try again!",
+        type: "error",
+      });
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 600);
+      return;
+    }
+
+    // List of common generic words that shouldn't count on their own
+    const commonWords = [
+      "comic",
+      "manga",
+      "manhwa",
+      "manhua",
+      "chapter",
+      "volume",
+      "season",
+      "part",
+      "the",
+    ];
+
+    if (commonWords.includes(normalizedGuess) || normalizedGuess.length < 5) {
+      setMessage({
+        text: "Be more specific with your guess!",
+        type: "error",
+      });
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 600);
+      return;
+    }
+
     const isCorrect = validTitles.some((title) => {
       const normalizedTitle = normalizeTitle(title);
+
+      if (normalizedTitle === normalizedGuess) {
+        return true;
+      }
+
+      if (normalizedTitle.length < 15) {
+        return (
+          (normalizedTitle.includes(normalizedGuess) &&
+            normalizedGuess.length >= normalizedTitle.length * 0.7) ||
+          (normalizedGuess.includes(normalizedTitle) &&
+            normalizedTitle.length >= normalizedGuess.length * 0.7)
+        );
+      }
+
+      const titleWords = normalizedTitle.split(" ").filter((w) => w.length > 1);
+      const guessWords = normalizedGuess.split(" ").filter((w) => w.length > 1);
+
+      const minRequiredLength = Math.max(
+        5,
+        Math.floor(normalizedTitle.length * 0.3)
+      );
+      if (normalizedGuess.length < minRequiredLength) {
+        return false;
+      }
+
+      if (guessWords.length === 1 && guessWords[0].length < 8) {
+        const significantTitleWords = titleWords.filter(
+          (word) => !commonWords.includes(word) && word.length >= 5
+        );
+
+        return significantTitleWords.some(
+          (word) =>
+            word === guessWords[0] ||
+            (word.length > 6 &&
+              word.includes(guessWords[0]) &&
+              guessWords[0].length >= word.length * 0.8)
+        );
+      }
+
+      if (guessWords.length > 1) {
+        const guessPhrase = guessWords.join(" ");
+        if (normalizedTitle.includes(guessPhrase) && guessPhrase.length >= 8) {
+          return true;
+        }
+
+        let sequenceMatches = 0;
+        let longestSequence = 0;
+        let currentSequence = 0;
+
+        for (let i = 0; i < titleWords.length - 1; i++) {
+          for (let j = 0; j < guessWords.length - 1; j++) {
+            if (
+              titleWords[i] === guessWords[j] &&
+              titleWords[i + 1] === guessWords[j + 1]
+            ) {
+              sequenceMatches += 1;
+              currentSequence += 1;
+              longestSequence = Math.max(longestSequence, currentSequence);
+            } else {
+              currentSequence = 0;
+            }
+          }
+        }
+
+        if (
+          longestSequence >= guessWords.length * 0.7 &&
+          guessWords.length >= 3
+        ) {
+          return true;
+        }
+      }
+
+      const matchingWords = titleWords
+        .filter((word) => !commonWords.includes(word) && word.length > 3)
+        .filter((word) =>
+          guessWords.some(
+            (guessWord) =>
+              !commonWords.includes(guessWord) &&
+              guessWord.length > 3 &&
+              (word === guessWord ||
+                (word.includes(guessWord) &&
+                  guessWord.length >= word.length * 0.8) ||
+                (guessWord.includes(word) &&
+                  word.length >= guessWord.length * 0.8))
+          )
+        );
+
+      const significantTitleWords = titleWords.filter(
+        (word) => !commonWords.includes(word) && word.length > 3
+      );
+
+      if (significantTitleWords.length === 0) {
+        return (
+          normalizedTitle.includes(normalizedGuess) &&
+          normalizedGuess.length >= Math.max(5, normalizedTitle.length * 0.4)
+        );
+      }
+
+      const wordMatchRatio =
+        matchingWords.length / significantTitleWords.length;
+
       return (
-        normalizedTitle === normalizedGuess ||
-        normalizedTitle.includes(normalizedGuess) ||
-        normalizedGuess.includes(normalizedTitle)
+        // At least 50% of significant words match AND guess is substantial
+        (wordMatchRatio >= 0.5 &&
+          normalizedGuess.length >=
+            Math.max(8, normalizedTitle.length * 0.3)) ||
+        // OR very high word match
+        (wordMatchRatio >= 0.8 && guessWords.length >= 2) ||
+        // OR the guess contains a very large portion of the title
+        (normalizedTitle.includes(normalizedGuess) &&
+          normalizedGuess.length >= normalizedTitle.length * 0.6)
       );
     });
 
