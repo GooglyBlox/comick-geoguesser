@@ -817,13 +817,6 @@ export default function Home() {
           comic.content_rating || "unknown"
         }"`;
 
-      case "translation-status":
-        return comic.translation_completed === true
-          ? "The translation for this comic is complete"
-          : comic.translation_completed === false
-          ? "The translation for this comic is still ongoing"
-          : "The translation status for this comic is unknown";
-
       case "status":
         return `The publication status is: ${
           comic.status === 1
