@@ -39,8 +39,8 @@ export default function Home() {
   const [hintsRemaining, setHintsRemaining] = useState(HINTS_PER_COMIC);
   const [currentHint, setCurrentHint] = useState<string | null>(null);
   const [usedHintTypes, setUsedHintTypes] = useState<string[]>([]);
+  const [titlePool, setTitlePool] = useState<string[]>([]);
 
-  // Filter states
   const [contentRating, setContentRating] = useState<string[]>([
     "safe",
     "suggestive",
@@ -60,6 +60,35 @@ export default function Home() {
   const [genreMap, setGenreMap] = useState<Map<number, Genre>>(new Map());
   const [isLoadingGenres, setIsLoadingGenres] = useState(true);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+
+  const fetchAndUpdateTitlePool = useCallback(async () => {
+    try {
+      const pages = [1, 2, 3, 4, 5];
+      for (const page of pages) {
+        const response = await fetch(`/api/comick?limit=50&page=${page}`);
+        if (response.ok) {
+          const data = await response.json();
+          const comics = Array.isArray(data)
+            ? data
+            : data && Array.isArray(data.data)
+            ? data.data
+            : [];
+
+          const titles = comics
+            .filter(
+              (comic: Comic) => comic.title && typeof comic.title === "string"
+            )
+            .map((comic: Comic) => comic.title);
+
+          setTitlePool((prev) => {
+            return [...new Set([...prev, ...titles])];
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching title pool:", error);
+    }
+  }, []);
 
   useEffect(() => {
     const savedContentRating = localStorage.getItem("contentRating");
@@ -181,7 +210,9 @@ export default function Home() {
     };
 
     fetchGenres();
-  }, []);
+
+    fetchAndUpdateTitlePool();
+  }, [fetchAndUpdateTitlePool]);
 
   useEffect(() => {
     localStorage.setItem("contentRating", JSON.stringify(contentRating));
@@ -236,6 +267,16 @@ export default function Home() {
 
       try {
         const data = JSON.parse(text);
+
+        const comics = Array.isArray(data) ? data : data.data || [];
+        const titles = comics
+          .filter(
+            (comic: Comic) => comic.title && typeof comic.title === "string"
+          )
+          .map((comic: Comic) => comic.title);
+
+        setTitlePool((prev) => [...new Set([...prev, ...titles])]);
+
         return data;
       } catch (parseError) {
         console.error(`Error parsing JSON from page ${page}:`, parseError);
@@ -531,32 +572,125 @@ export default function Home() {
     }
   };
 
-  const getValidTitles = () => {
-    if (!comicDetail) return [];
+  const generateTitleOptions = useCallback(() => {
+    if (!comicDetail || !comicDetail.comic || !comicDetail.comic.title)
+      return [];
 
-    const comic = comicDetail.comic;
-    if (!comic) return [];
+    const correctTitle = comicDetail.comic.title;
 
-    const titles =
-      comic.title && typeof comic.title === "string" ? [comic.title] : [];
+    const calculateSimilarity = (title1: string, title2: string): number => {
+      const t1 = title1.toLowerCase();
+      const t2 = title2.toLowerCase();
 
-    if (comic.md_titles && Array.isArray(comic.md_titles)) {
-      comic.md_titles.forEach((titleObj) => {
-        if (
-          titleObj &&
-          titleObj.title &&
-          typeof titleObj.title === "string" &&
-          titleObj.title.trim() !== ""
-        ) {
-          titles.push(titleObj.title);
+      const words1 = t1.split(/\s+/).filter((w) => w.length > 1);
+      const words2 = t2.split(/\s+/).filter((w) => w.length > 1);
+
+      let commonWords = 0;
+      for (const word1 of words1) {
+        if (word1.length < 3) continue;
+        if (words2.some((word2) => word2 === word1)) {
+          commonWords++;
         }
-      });
+      }
+
+      const wordOverlapRatio =
+        commonWords / Math.max(words1.length, words2.length);
+
+      const lengthRatio =
+        Math.min(t1.length, t2.length) / Math.max(t1.length, t2.length);
+
+      let charOverlap = 0;
+      const checkLength = Math.min(t1.length, t2.length, 5);
+      for (let i = 0; i < checkLength; i++) {
+        if (t1[i] === t2[i]) charOverlap++;
+      }
+      const charOverlapRatio = charOverlap / checkLength;
+
+      return (
+        wordOverlapRatio * 0.6 + lengthRatio * 0.2 + charOverlapRatio * 0.2
+      );
+    };
+
+    const similarTitles = titlePool
+      .filter((title) => title !== correctTitle)
+      .map((title) => ({
+        title,
+        similarity: calculateSimilarity(correctTitle, title),
+      }))
+      .filter((item) => item.similarity > 0.2)
+      .sort((a, b) => b.similarity - a.similarity);
+
+    const selectedAlternatives: string[] = [];
+
+    if (similarTitles.length > 0) {
+      selectedAlternatives.push(similarTitles[0].title);
+
+      if (similarTitles.length > 1) {
+        for (let i = 1; i < Math.min(similarTitles.length, 10); i++) {
+          const firstSelected = selectedAlternatives[0];
+          const currentTitle = similarTitles[i].title;
+
+          if (calculateSimilarity(firstSelected, currentTitle) < 0.7) {
+            selectedAlternatives.push(currentTitle);
+            break;
+          }
+        }
+
+        if (selectedAlternatives.length === 1) {
+          selectedAlternatives.push(similarTitles[1].title);
+        }
+      }
     }
 
-    return titles
-      .filter((title) => typeof title === "string" && title.trim() !== "")
-      .filter((title, index, self) => self.indexOf(title) === index);
-  };
+    if (selectedAlternatives.length < 2) {
+      const randomTitles = titlePool
+        .filter(
+          (title) =>
+            title !== correctTitle && !selectedAlternatives.includes(title)
+        )
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2 - selectedAlternatives.length);
+
+      selectedAlternatives.push(...randomTitles);
+    }
+
+    while (selectedAlternatives.length < 2) {
+      const words = correctTitle.split(" ");
+      if (words.length > 1) {
+        const copy = [...words];
+        copy.splice(Math.floor(Math.random() * copy.length), 1);
+        const variant = copy.join(" ");
+
+        if (
+          !selectedAlternatives.includes(variant) &&
+          variant !== correctTitle
+        ) {
+          selectedAlternatives.push(variant);
+        } else {
+          const suffixes = ["Series", "Chronicles", "Adventures", "Stories"];
+          selectedAlternatives.push(
+            `${correctTitle} ${
+              suffixes[Math.floor(Math.random() * suffixes.length)]
+            }`
+          );
+        }
+      } else {
+        const suffixes = ["Next", "Z", "X", "DX", "2", "II"];
+        const variant = `${correctTitle} ${
+          suffixes[Math.floor(Math.random() * suffixes.length)]
+        }`;
+        selectedAlternatives.push(variant);
+      }
+    }
+
+    const options = [correctTitle, ...selectedAlternatives];
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+
+    return options;
+  }, [comicDetail, titlePool]);
 
   const generateHint = () => {
     if (!comicDetail || !comicDetail.comic) return null;
@@ -625,7 +759,6 @@ export default function Home() {
     }
 
     switch (hintType) {
-      // Title-based hints
       case "first-letter":
         return title.length > 0
           ? `The title starts with the letter "${title[0].toUpperCase()}"`
@@ -999,7 +1132,8 @@ export default function Home() {
               <GameInterface
                 images={chapterImages}
                 isLoading={isLoadingImages}
-                validTitles={getValidTitles()}
+                correctTitle={comicDetail?.comic?.title || ""}
+                generateOptions={generateTitleOptions}
                 onCorrectGuess={handleCorrectGuess}
                 onSkip={handleSkip}
                 streak={streak}

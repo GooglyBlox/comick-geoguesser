@@ -6,7 +6,8 @@ import ComicViewer from "./ComicViewer";
 interface GameInterfaceProps {
   images: ChapterImage[];
   isLoading: boolean;
-  validTitles: string[];
+  correctTitle: string;
+  generateOptions: () => string[];
   onCorrectGuess: () => void;
   onSkip: () => void;
   streak: number;
@@ -19,7 +20,8 @@ interface GameInterfaceProps {
 const GameInterface: React.FC<GameInterfaceProps> = ({
   images,
   isLoading,
-  validTitles,
+  correctTitle,
+  generateOptions,
   onCorrectGuess,
   onSkip,
   streak,
@@ -34,7 +36,8 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
       </div>
       <div className="lg:col-span-2 order-1 lg:order-2">
         <GuessForm
-          validTitles={validTitles}
+          correctTitle={correctTitle}
+          generateOptions={generateOptions}
           onCorrectGuess={onCorrectGuess}
           onSkip={onSkip}
           streak={streak}
