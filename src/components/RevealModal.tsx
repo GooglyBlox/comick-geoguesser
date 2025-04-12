@@ -1,7 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { Comic, Genre } from "@/types";
-import { X, ExternalLink, Award, Check, Info, Tag, Globe, BookOpen } from "lucide-react";
+import {
+  X,
+  ExternalLink,
+  Award,
+  Check,
+  Info,
+  Tag,
+  Globe,
+  BookOpen,
+} from "lucide-react";
 
 interface RevealModalProps {
   comic: Comic | null;
@@ -19,12 +28,12 @@ const RevealModal: React.FC<RevealModalProps> = ({
   if (!comic) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-slate-950/90 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-slate-950/90 backdrop-blur-md animate-fadeIn">
       <div className="glass border border-slate-700/50 rounded-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-auto">
-        <div className="p-4 border-b border-slate-700/50 flex justify-between items-center">
+        <div className="p-4 border-b border-slate-700/40 flex justify-between items-center">
           <h3
             className={`text-xl font-bold flex items-center ${
-              correct ? "text-green-400" : "text-sky-400"
+              correct ? "text-emerald-400" : "text-sky-400"
             }`}
           >
             {correct ? (
@@ -49,10 +58,10 @@ const RevealModal: React.FC<RevealModalProps> = ({
 
         <div className="p-5">
           {correct && (
-            <div className="mb-4 p-3 bg-green-900/30 border border-green-800/40 rounded-lg text-green-100 flex items-start">
+            <div className="mb-4 p-3 bg-emerald-900/30 border border-emerald-800/40 rounded-lg text-emerald-100 flex items-start">
               <Check
                 size={20}
-                className="text-green-400 mr-2 mt-0.5 flex-shrink-0"
+                className="text-emerald-400 mr-2 mt-0.5 flex-shrink-0"
               />
               <p>
                 Great job! You correctly identified this comic. Your streak has
@@ -75,13 +84,15 @@ const RevealModal: React.FC<RevealModalProps> = ({
             )}
 
             <div>
-              <h4 className="text-xl font-bold mb-2 text-sky-100">
+              <h4 className="text-xl font-bold mb-2 text-white">
                 {comic.title}
               </h4>
 
               {comic.md_titles && comic.md_titles.length > 0 && (
                 <div className="mb-3">
-                  <h5 className="text-sm text-slate-400 mb-1">Also known as:</h5>
+                  <h5 className="text-sm text-slate-400 mb-1">
+                    Also known as:
+                  </h5>
                   <ul className="text-sm text-slate-300 space-y-1">
                     {comic.md_titles
                       .filter(
@@ -122,10 +133,10 @@ const RevealModal: React.FC<RevealModalProps> = ({
                       comic.status === 1
                         ? "bg-sky-900/50 text-sky-100 border border-sky-800/30"
                         : comic.status === 2
-                        ? "bg-green-900/50 text-green-100 border border-green-800/30"
+                        ? "bg-emerald-900/50 text-emerald-100 border border-emerald-800/30"
                         : comic.status === 3
                         ? "bg-red-900/50 text-red-100 border border-red-800/30"
-                        : "bg-yellow-900/50 text-yellow-100 border border-yellow-800/30"
+                        : "bg-amber-900/50 text-amber-100 border border-amber-800/30"
                     }`}
                   >
                     {comic.status === 1
@@ -164,38 +175,50 @@ const RevealModal: React.FC<RevealModalProps> = ({
                   {comic.genres.slice(0, 5).map((genreId) => {
                     const genre = genreMap.get(genreId);
                     return (
-                      <span key={genreId} className="badge badge-secondary text-xs">
+                      <span
+                        key={genreId}
+                        className="badge badge-secondary text-xs"
+                      >
                         {genre ? genre.name : genreId}
                       </span>
                     );
                   })}
                   {comic.genres.length > 5 && (
-                    <span className="text-xs text-slate-500">+{comic.genres.length - 5} more</span>
+                    <span className="text-xs text-slate-500">
+                      +{comic.genres.length - 5} more
+                    </span>
                   )}
                 </div>
               </div>
             )}
-            
+
             <div className="p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
               <h5 className="text-xs font-medium text-slate-400 mb-2 flex items-center">
                 <Globe size={14} className="mr-1.5 text-slate-500" />
                 Country
               </h5>
               <p className="text-sm">
-                {comic.country === 'jp' ? 'Japan (Manga)' :
-                 comic.country === 'kr' ? 'Korea (Manhwa)' :
-                 comic.country === 'cn' ? 'China (Manhua)' :
-                 comic.country === 'hk' ? 'Hong Kong' : 'English'}
+                {comic.country === "jp"
+                  ? "Japan (Manga)"
+                  : comic.country === "kr"
+                  ? "Korea (Manhwa)"
+                  : comic.country === "cn"
+                  ? "China (Manhua)"
+                  : comic.country === "hk"
+                  ? "Hong Kong"
+                  : "English"}
               </p>
             </div>
-            
+
             <div className="p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
               <h5 className="text-xs font-medium text-slate-400 mb-2 flex items-center">
                 <BookOpen size={14} className="mr-1.5 text-slate-500" />
                 Chapters
               </h5>
               <p className="text-sm">
-                {comic.last_chapter ? `${comic.last_chapter} chapters` : 'Unknown'}
+                {comic.last_chapter
+                  ? `${comic.last_chapter} chapters`
+                  : "Unknown"}
               </p>
             </div>
           </div>

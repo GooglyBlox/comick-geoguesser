@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
-import { HelpCircle, X, Send, Sparkles, PenLine } from "lucide-react";
+import { 
+  HelpCircle, 
+  Send, 
+  X, 
+  Lightbulb, 
+  CheckCircle, 
+  AlertCircle, 
+  Sparkles,
+  RefreshCw
+} from "lucide-react";
 
 interface GuessFormProps {
   validTitles: string[];
@@ -238,118 +247,144 @@ const GuessForm: React.FC<GuessFormProps> = ({
   };
 
   return (
-    <div className="glass rounded-xl p-6 mb-6 animate-fadeIn">
-      <div className="flex justify-between mb-6 items-center">
-        <div className="flex gap-4 items-center">
-          <div className="bg-sky-600 bg-opacity-40 text-sky-100 px-4 py-1.5 rounded-lg text-sm font-medium flex items-center border border-sky-600/30">
-            <Sparkles size={16} className="mr-2 text-yellow-300" />
-            <span className="mr-1">Streak:</span>
-            <span className="text-lg font-bold">{streak}</span>
-          </div>
-          <div className="text-slate-300 text-sm flex items-center">
-            <span className="mr-2">Hints:</span>
-            <div className="flex space-x-1">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-3 h-3 rounded-full ${
-                    index < hintsRemaining
-                      ? "bg-sky-500 animate-pulse-soft"
-                      : "bg-slate-700"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="ml-2">{hintsRemaining} remaining</span>
-          </div>
-        </div>
-        <button
-          onClick={useHint}
-          disabled={hintsRemaining <= 0}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-all ${
-            hintsRemaining > 0
-              ? "bg-sky-600 bg-opacity-60 text-white hover:bg-opacity-80 border border-sky-500/30"
-              : "bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700/30"
-          }`}
-        >
-          <HelpCircle size={16} />
-          Use Hint
-        </button>
+    <div className="bg-zinc-900/80 rounded-2xl border border-zinc-800/60 overflow-hidden">
+      <div className="bg-black/40 px-5 py-4 border-b border-zinc-800/60">
+        <h2 className="text-xl text-white font-semibold">Guess the Comic</h2>
+        <p className="text-zinc-400 text-sm mt-1">
+          Identify the comic based on the panels shown
+        </p>
       </div>
 
-      {hint && (
-        <div className="mb-5 p-4 bg-sky-900/20 border border-sky-800/30 rounded-lg text-sky-100 animate-fadeIn">
-          <div className="font-medium mb-1 flex items-center">
-            <HelpCircle size={16} className="mr-2 text-sky-400" />
-            Hint:
+      <div className="p-5">
+        {/* Game Stats */}
+        <div className="flex flex-wrap justify-between mb-5 gap-3">
+          <div className="bg-violet-900/20 border border-violet-800/30 px-4 py-2 rounded-xl text-sm font-medium flex items-center">
+            <Sparkles size={16} className="mr-2 text-amber-400" />
+            <span className="text-violet-200 mr-1">Streak:</span>
+            <span className="text-white text-lg font-bold">{streak}</span>
           </div>
-          <div className="text-sm ml-6">{hint}</div>
-        </div>
-      )}
-
-      {message && (
-        <div
-          className={`mb-5 p-4 rounded-lg animate-fadeIn ${
-            message.type === "success"
-              ? "bg-green-900/20 border border-green-800/30 text-green-100"
-              : message.type === "error"
-              ? "bg-red-900/20 border border-red-800/30 text-red-100"
-              : "bg-sky-900/20 border border-sky-800/30 text-sky-100"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
-
-      <form onSubmit={checkGuess} className="space-y-5">
-        <div>
-          <label
-            htmlFor="guess"
-            className="block text-sm font-medium text-slate-300 mb-2 flex items-center"
-          >
-            <PenLine size={16} className="mr-2 text-sky-400" />
-            What&apos;s the name of this comic?
-          </label>
-          <div className={`relative ${isShaking ? "animate-shake" : ""}`}>
-            <input
-              type="text"
-              id="guess"
-              ref={inputRef}
-              value={guess}
-              onChange={(e) => setGuess(e.target.value)}
-              placeholder="Enter your guess..."
-              className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-transparent"
-            />
-            {guess.trim() && (
-              <button
-                type="button"
-                onClick={() => setGuess("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300"
-              >
-                <X size={18} />
-              </button>
-            )}
+          
+          <div className="flex items-center">
+            <span className="text-zinc-400 mr-3 text-sm">Hints:</span>
+            <div className="flex space-x-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div 
+                  key={i}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    i < hintsRemaining 
+                      ? "bg-violet-500/20 text-violet-400 border border-violet-500/30" 
+                      : "bg-zinc-800/50 text-zinc-600 border border-zinc-700/30"
+                  }`}
+                >
+                  <Lightbulb size={14} />
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={useHint}
+              disabled={hintsRemaining <= 0}
+              className={`ml-3 px-3 py-1.5 rounded-lg text-sm ${
+                hintsRemaining > 0
+                  ? "bg-violet-600 text-white hover:bg-violet-700"
+                  : "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
+              }`}
+            >
+              Use Hint
+            </button>
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors flex-1 flex items-center justify-center focus:ring-2 focus:ring-sky-500/50 focus:ring-offset-2 focus:ring-offset-slate-900"
+        {/* Hint display */}
+        {hint && (
+          <div className="mb-5 p-4 bg-violet-950/30 border border-violet-800/30 rounded-xl text-zinc-200 animate-fadeIn">
+            <div className="flex">
+              <div className="mr-3 mt-1">
+                <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
+                  <Lightbulb size={16} className="text-violet-400" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-medium text-violet-300 mb-1">Hint:</h3>
+                <p className="text-zinc-300">{hint}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success/Error message */}
+        {message && (
+          <div
+            className={`mb-5 p-4 rounded-xl animate-fadeIn ${
+              message.type === "success"
+                ? "bg-emerald-950/30 border border-emerald-800/30"
+                : message.type === "error"
+                ? "bg-rose-950/30 border border-rose-800/30"
+                : "bg-sky-950/30 border border-sky-800/30"
+            }`}
           >
-            <span>Submit Guess</span>
-            <Send size={16} className="ml-2" />
-          </button>
-          <button
-            type="button"
-            onClick={handleSkip}
-            className="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-1 focus:ring-2 focus:ring-slate-500/50 focus:ring-offset-2 focus:ring-offset-slate-900"
-          >
-            <X size={16} />
-            <span>Skip</span>
-          </button>
-        </div>
-      </form>
+            <div className="flex items-center">
+              {message.type === "success" ? (
+                <CheckCircle size={18} className="text-emerald-400 mr-2 flex-shrink-0" />
+              ) : message.type === "error" ? (
+                <AlertCircle size={18} className="text-rose-400 mr-2 flex-shrink-0" />
+              ) : (
+                <HelpCircle size={18} className="text-sky-400 mr-2 flex-shrink-0" />
+              )}
+              <span className={message.type === "success" ? "text-emerald-300" : message.type === "error" ? "text-rose-300" : "text-sky-300"}>
+                {message.text}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Guess Input Form */}
+        <form onSubmit={checkGuess} className="space-y-5">
+          <div className={isShaking ? "animate-shake" : ""}>
+            <label htmlFor="guess" className="text-zinc-400 text-sm block mb-2">
+              What&apos;s the name of this comic?
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="guess"
+                ref={inputRef}
+                value={guess}
+                onChange={(e) => setGuess(e.target.value)}
+                placeholder="Enter your guess..."
+                className="w-full px-4 py-3 bg-black/30 border border-zinc-700/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              />
+              {guess.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setGuess("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center transition-colors"
+            >
+              <span>Submit Guess</span>
+              <Send size={16} className="ml-2" />
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-xl flex items-center justify-center transition-colors"
+            >
+              <RefreshCw size={16} className="mr-2" />
+              <span>Skip</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

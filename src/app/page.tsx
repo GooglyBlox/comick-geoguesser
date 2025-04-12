@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -11,17 +11,12 @@ import type {
   ChapterImage,
   GenreInfo,
 } from "@/types";
-import FilterPanel from "@/components/FilterPanel";
-import ComicPanel from "@/components/ComicPanel";
-import GuessForm from "@/components/GuessForm";
+import Header from "@/components/Header";
+import FilterControls from "@/components/FilterControls";
+import GameInterface from "@/components/GameInterface";
+import HistorySection from "@/components/HistorySection";
 import RevealModal from "@/components/RevealModal";
-import {
-  Loader2,
-  RefreshCcw,
-  Trophy,
-  History,
-  AlertCircle,
-} from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
 const MAX_PAGES_TO_TRY = 30;
 const HINTS_PER_COMIC = 3;
@@ -558,8 +553,6 @@ export default function Home() {
       });
     }
 
-    console.log("Valid titles for this comic:", titles);
-
     return titles
       .filter((title) => typeof title === "string" && title.trim() !== "")
       .filter((title, index, self) => self.indexOf(title) === index);
@@ -939,67 +932,85 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-slate-900 text-white">
-      <div className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-white">
-              Comic Geoguesser
-            </h1>
-            <div className="flex gap-4 items-center">
-              <div className="flex items-center gap-2 glass px-4 py-2 rounded-xl">
-                <div className="flex items-center gap-1 text-yellow-300">
-                  <Trophy size={18} />
-                  <span className="font-medium text-slate-300">
-                    Best Streak:
-                  </span>
-                  <span className="text-lg font-bold">{bestStreak}</span>
-                </div>
-              </div>
+    <main className="min-h-screen bg-zinc-950 text-white">
+      <Header bestStreak={bestStreak} currentStreak={streak} />
+
+      <div className="container max-w-6xl mx-auto px-4 pt-8 pb-16">
+        <FilterControls
+          contentRating={contentRating}
+          origin={origin}
+          status={status}
+          includedGenres={includedGenres}
+          excludedGenres={excludedGenres}
+          onContentRatingChange={handleContentRatingChange}
+          onOriginChange={handleOriginChange}
+          onStatusChange={handleStatusChange}
+          onIncludeGenre={handleIncludeGenre}
+          onExcludeGenre={handleExcludeGenre}
+          onRemoveGenre={handleRemoveGenre}
+          onClearGenreFilters={handleClearGenreFilters}
+          genres={genres}
+          isLoading={isLoadingGenres}
+        />
+
+        {!foundComic ? (
+          <div className="mt-16 mb-16 text-center">
+            <div className="inline-block mb-1 p-1 rounded-full">
+              <img
+                src="/unicorn-512.png"
+                alt="Game icon"
+                width={128}
+                height={128}
+              />
             </div>
+            <h2 className="text-2xl font-bold text-white mb-3">
+              Ready to Guess Some Comics?
+            </h2>
+            <p className="text-zinc-400 max-w-md mx-auto mb-8">
+              Test your comic knowledge! We&apos;ll show you random panels, and
+              you&apos;ll try to guess the title.
+            </p>
+            <button
+              onClick={findRandomComic}
+              disabled={isLoading}
+              className="btn px-6 py-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-medium inline-flex items-center gap-2 shadow-lg shadow-violet-500/20"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Finding comic...
+                </>
+              ) : (
+                <>
+                  <RefreshCw size={20} />
+                  Start New Game
+                </>
+              )}
+            </button>
           </div>
+        ) : (
+          <div className="mt-8">
+            {error ? (
+              <div className="p-4 bg-rose-900/30 border border-rose-700/40 rounded-xl text-center mb-8 flex items-center justify-center gap-2">
+                <AlertCircle size={20} className="text-rose-400" />
+                <span className="text-rose-100">{error}</span>
+              </div>
+            ) : (
+              <GameInterface
+                images={chapterImages}
+                isLoading={isLoadingImages}
+                validTitles={getValidTitles()}
+                onCorrectGuess={handleCorrectGuess}
+                onSkip={handleSkip}
+                streak={streak}
+                useHint={useHint}
+                hintsRemaining={hintsRemaining}
+                hint={currentHint}
+                comic={foundComic}
+              />
+            )}
 
-          <FilterPanel
-            contentRating={contentRating}
-            origin={origin}
-            status={status}
-            includedGenres={includedGenres}
-            excludedGenres={excludedGenres}
-            onContentRatingChange={handleContentRatingChange}
-            onOriginChange={handleOriginChange}
-            onStatusChange={handleStatusChange}
-            onIncludeGenre={handleIncludeGenre}
-            onExcludeGenre={handleExcludeGenre}
-            onRemoveGenre={handleRemoveGenre}
-            onClearGenreFilters={handleClearGenreFilters}
-            genres={genres}
-            isLoading={isLoadingGenres}
-            isExpanded={isFilterExpanded}
-            onToggleExpand={() => setIsFilterExpanded(!isFilterExpanded)}
-          />
-
-          {!foundComic ? (
-            <div className="mt-8 mb-10 flex justify-center">
-              <button
-                onClick={findRandomComic}
-                disabled={isLoading}
-                className="btn btn-primary px-6 py-4 text-base rounded-xl flex items-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={22} className="animate-spin" />
-                    Finding comic...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCcw size={22} />
-                    Start New Game
-                  </>
-                )}
-              </button>
-            </div>
-          ) : (
-            <div className="mt-6 mb-8 flex justify-end">
+            <div className="flex justify-end mt-5">
               <button
                 onClick={() => {
                   if (
@@ -1012,118 +1023,16 @@ export default function Home() {
                     handleNextComic();
                   }
                 }}
-                className="btn btn-secondary px-3 py-1.5 text-sm rounded-lg flex items-center gap-1"
+                className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg inline-flex items-center gap-1"
               >
-                <RefreshCcw size={14} />
+                <RefreshCw size={14} />
                 New Game
               </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-900/30 border border-red-700/40 rounded-xl text-center animate-fadeIn flex items-center justify-center gap-2">
-              <AlertCircle size={20} className="text-red-400" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {foundComic && chapterImages.length > 0 && (
-            <div className="animate-fadeIn mb-8 comic-container">
-              <div className="mb-8">
-                <ComicPanel
-                  images={chapterImages}
-                  isLoading={isLoadingImages}
-                />
-              </div>
-
-              <GuessForm
-                validTitles={getValidTitles()}
-                onCorrectGuess={handleCorrectGuess}
-                onSkip={handleSkip}
-                streak={streak}
-                useHint={useHint}
-                hintsRemaining={hintsRemaining}
-                hint={currentHint}
-              />
-            </div>
-          )}
-
-          {guessHistory.length > 0 && (
-            <div className="mb-10">
-              <div className="flex items-center gap-2 mb-4 border-b border-slate-700/70 pb-2">
-                <History size={18} className="text-sky-400" />
-                <h2 className="text-lg font-medium text-slate-100">
-                  Recent Comics
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {guessHistory.map(
-                  (item: { comic: Comic; correct: boolean }, index: number) => (
-                    <div
-                      key={`${item.comic.id}-${index}`}
-                      className={`p-4 rounded-xl flex gap-4 transition-all hover:translate-y-[-2px] ${
-                        item.correct
-                          ? "glass border-green-700/40"
-                          : "glass border-red-700/40"
-                      }`}
-                    >
-                      {item.comic.md_covers &&
-                      item.comic.md_covers.length > 0 ? (
-                        <img
-                          src={`https://meo.comick.pictures/${item.comic.md_covers[0].b2key}`}
-                          alt={item.comic.title}
-                          className="w-16 h-24 object-cover rounded-lg border border-slate-700/80"
-                        />
-                      ) : (
-                        <div className="w-16 h-24 bg-slate-800 rounded-lg border border-slate-700/80 flex items-center justify-center text-slate-600 text-xs">
-                          No Cover
-                        </div>
-                      )}
-                      <div className="overflow-hidden flex-1">
-                        <h4 className="font-medium text-white mb-1.5 truncate">
-                          {item.comic.title}
-                        </h4>
-                        <div className="flex flex-wrap gap-1.5 mb-2">
-                          {item.comic.country && (
-                            <span className="badge badge-secondary">
-                              {item.comic.country.toUpperCase()}
-                            </span>
-                          )}
-                          {item.comic.status !== undefined && (
-                            <span className="badge badge-secondary">
-                              {item.comic.status === 1
-                                ? "Ongoing"
-                                : item.comic.status === 2
-                                ? "Completed"
-                                : item.comic.status === 3
-                                ? "Cancelled"
-                                : "Hiatus"}
-                            </span>
-                          )}
-                          <span
-                            className={`badge ${
-                              item.correct
-                                ? "bg-green-900/50 text-green-100 border-green-800/30"
-                                : "bg-red-900/50 text-red-100 border-red-800/30"
-                            }`}
-                          >
-                            {item.correct ? "Correct" : "Skipped"}
-                          </span>
-                        </div>
-                        {item.comic.desc && (
-                          <p className="text-xs text-slate-300 line-clamp-2">
-                            {item.comic.desc}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        <HistorySection guessHistory={guessHistory} />
       </div>
 
       {showModal && (
