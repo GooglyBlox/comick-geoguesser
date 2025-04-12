@@ -10,19 +10,21 @@ import {
   Tag,
   Globe,
   BookOpen,
+  XCircle,
+  SkipForward,
 } from "lucide-react";
 
 interface RevealModalProps {
   comic: Comic | null;
   onClose: () => void;
-  correct: boolean;
+  result: "correct" | "incorrect" | "skipped";
   genreMap: Map<number, Genre>;
 }
 
 const RevealModal: React.FC<RevealModalProps> = ({
   comic,
   onClose,
-  correct,
+  result,
   genreMap,
 }) => {
   if (!comic) return null;
@@ -33,18 +35,24 @@ const RevealModal: React.FC<RevealModalProps> = ({
         <div className="p-4 border-b border-zinc-800/60 flex justify-between items-center bg-black/30">
           <h3
             className={`text-xl font-bold flex items-center ${
-              correct ? "text-emerald-400" : "text-violet-400"
+              result === "correct" ? "text-emerald-400" : 
+              result === "incorrect" ? "text-rose-400" : "text-amber-400"
             }`}
           >
-            {correct ? (
+            {result === "correct" ? (
               <>
                 <Award size={22} className="mr-2 text-amber-400" />
                 Correct!
               </>
+            ) : result === "incorrect" ? (
+              <>
+                <XCircle size={22} className="mr-2 text-rose-400" />
+                Incorrect
+              </>
             ) : (
               <>
-                <Info size={22} className="mr-2 text-violet-400" />
-                Comic Revealed
+                <SkipForward size={22} className="mr-2 text-amber-400" />
+                Skipped
               </>
             )}
           </h3>
@@ -57,7 +65,7 @@ const RevealModal: React.FC<RevealModalProps> = ({
         </div>
 
         <div className="p-5">
-          {correct && (
+          {result === "correct" && (
             <div className="mb-4 p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-lg text-emerald-100 flex items-start">
               <Check
                 size={20}
@@ -66,6 +74,18 @@ const RevealModal: React.FC<RevealModalProps> = ({
               <p>
                 Great job! You correctly identified this comic. Your streak has
                 been increased!
+              </p>
+            </div>
+          )}
+          
+          {result === "incorrect" && (
+            <div className="mb-4 p-3 bg-rose-950/30 border border-rose-800/40 rounded-lg text-rose-100 flex items-start">
+              <XCircle
+                size={20}
+                className="text-rose-400 mr-2 mt-0.5 flex-shrink-0"
+              />
+              <p>
+                Better luck next time! The correct title was &quot;{comic.title}&quot;.
               </p>
             </div>
           )}

@@ -9,6 +9,7 @@ interface GameInterfaceProps {
   correctTitle: string;
   generateOptions: () => string[];
   onCorrectGuess: () => void;
+  onIncorrectGuess: () => void;
   onSkip: () => void;
   streak: number;
   useHint: () => void;
@@ -23,6 +24,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
   correctTitle,
   generateOptions,
   onCorrectGuess,
+  onIncorrectGuess,
   onSkip,
   streak,
   useHint,
@@ -39,6 +41,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
           correctTitle={correctTitle}
           generateOptions={generateOptions}
           onCorrectGuess={onCorrectGuess}
+          onIncorrectGuess={onIncorrectGuess}
           onSkip={onSkip}
           streak={streak}
           useHint={useHint}

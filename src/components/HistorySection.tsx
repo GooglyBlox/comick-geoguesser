@@ -1,10 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { Comic } from "@/types";
-import { History, CheckCircle, XCircle } from "lucide-react";
+import { History, CheckCircle, XCircle, SkipForward } from "lucide-react";
 
 interface HistorySectionProps {
-  guessHistory: Array<{ comic: Comic; correct: boolean }>;
+  guessHistory: Array<{
+    comic: Comic;
+    result: "correct" | "incorrect" | "skipped";
+  }>;
 }
 
 const HistorySection: React.FC<HistorySectionProps> = ({ guessHistory }) => {
@@ -59,14 +62,19 @@ const HistorySection: React.FC<HistorySectionProps> = ({ guessHistory }) => {
                         </div>
                       )}
 
-                      {item.correct ? (
+                      {item.result === "correct" ? (
                         <div className="px-2 py-0.5 bg-emerald-900/30 rounded text-xs text-emerald-400 flex items-center">
                           <CheckCircle size={10} className="mr-1" />
                           Correct
                         </div>
-                      ) : (
+                      ) : item.result === "incorrect" ? (
                         <div className="px-2 py-0.5 bg-rose-900/30 rounded text-xs text-rose-400 flex items-center">
                           <XCircle size={10} className="mr-1" />
+                          Incorrect
+                        </div>
+                      ) : (
+                        <div className="px-2 py-0.5 bg-amber-900/30 rounded text-xs text-amber-400 flex items-center">
+                          <SkipForward size={10} className="mr-1" />
                           Skipped
                         </div>
                       )}

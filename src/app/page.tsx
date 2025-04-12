@@ -30,7 +30,7 @@ export default function Home() {
   const [chapterImages, setChapterImages] = useState<ChapterImage[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [guessHistory, setGuessHistory] = useState<
-    Array<{ comic: Comic; correct: boolean }>
+    Array<{ comic: Comic; result: "correct" | "incorrect" | "skipped" }>
   >([]);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
@@ -982,8 +982,8 @@ export default function Home() {
 
   const handleCorrectGuess = () => {
     if (foundComic) {
-      setGuessHistory((prev: Array<{ comic: Comic; correct: boolean }>) => [
-        { comic: foundComic, correct: true },
+      setGuessHistory((prev) => [
+        { comic: foundComic, result: "correct" },
         ...prev.slice(0, 9),
       ]);
 
@@ -1001,8 +1001,8 @@ export default function Home() {
 
   const handleSkip = () => {
     if (foundComic) {
-      setGuessHistory((prev: Array<{ comic: Comic; correct: boolean }>) => [
-        { comic: foundComic, correct: false },
+      setGuessHistory((prev) => [
+        { comic: foundComic, result: "skipped" },
         ...prev.slice(0, 9),
       ]);
 
@@ -1054,6 +1054,20 @@ export default function Home() {
   const handleClearGenreFilters = () => {
     setIncludedGenres([]);
     setExcludedGenres([]);
+  };
+
+  const handleIncorrectGuess = () => {
+    if (foundComic) {
+      setGuessHistory((prev) => [
+        { comic: foundComic, result: "incorrect" },
+        ...prev.slice(0, 9),
+      ]);
+
+      setStreak(0);
+
+      setModalCorrect(false);
+      setShowModal(true);
+    }
   };
 
   const useHint = () => {
@@ -1135,6 +1149,7 @@ export default function Home() {
                 correctTitle={comicDetail?.comic?.title || ""}
                 generateOptions={generateTitleOptions}
                 onCorrectGuess={handleCorrectGuess}
+                onIncorrectGuess={handleIncorrectGuess}
                 onSkip={handleSkip}
                 streak={streak}
                 useHint={useHint}
@@ -1173,7 +1188,7 @@ export default function Home() {
         <RevealModal
           comic={foundComic}
           onClose={handleNextComic}
-          correct={modalCorrect}
+          result={guessHistory.length > 0 ? guessHistory[0].result : "skipped"}
           genreMap={genreMap}
         />
       )}

@@ -7,11 +7,13 @@ import {
   Sparkles,
   RefreshCw,
   ArrowRight,
+  XCircle,
 } from "lucide-react";
 
 interface GuessFormProps {
   correctTitle: string;
   onCorrectGuess: () => void;
+  onIncorrectGuess: () => void;
   onSkip: () => void;
   streak: number;
   useHint: () => void;
@@ -23,6 +25,7 @@ interface GuessFormProps {
 const GuessForm: React.FC<GuessFormProps> = ({
   correctTitle,
   onCorrectGuess,
+  onIncorrectGuess,
   onSkip,
   streak,
   useHint,
@@ -68,15 +71,10 @@ const GuessForm: React.FC<GuessFormProps> = ({
         type: "error",
       });
       setTimeout(() => {
-        onSkip();
+        onIncorrectGuess();
         setMessage(null);
       }, 1500);
     }
-  };
-
-  const handleSkip = () => {
-    setOptions([]);
-    onSkip();
   };
 
   return (
@@ -89,7 +87,6 @@ const GuessForm: React.FC<GuessFormProps> = ({
       </div>
 
       <div className="p-5">
-        {/* Game Stats */}
         <div className="flex flex-wrap justify-between mb-5 gap-3">
           <div className="bg-violet-900/20 border border-violet-800/30 px-4 py-2 rounded-xl text-sm font-medium flex items-center">
             <Sparkles size={16} className="mr-2 text-amber-400" />
@@ -127,7 +124,6 @@ const GuessForm: React.FC<GuessFormProps> = ({
           </div>
         </div>
 
-        {/* Hint display */}
         {hint && (
           <div className="mb-5 p-4 bg-violet-950/30 border border-violet-800/30 rounded-xl text-zinc-200 animate-fadeIn">
             <div className="flex">
@@ -144,7 +140,6 @@ const GuessForm: React.FC<GuessFormProps> = ({
           </div>
         )}
 
-        {/* Success/Error message */}
         {message && (
           <div
             className={`mb-5 p-4 rounded-xl animate-fadeIn ${
@@ -187,7 +182,6 @@ const GuessForm: React.FC<GuessFormProps> = ({
           </div>
         )}
 
-        {/* Multiple Choice Options */}
         <div className="space-y-3 mb-5">
           {options.map((option, index) => (
             <button
@@ -212,6 +206,9 @@ const GuessForm: React.FC<GuessFormProps> = ({
                     className="text-emerald-400 flex-shrink-0"
                   />
                 )}
+                {selectedOption === option && option !== correctTitle && (
+                  <XCircle size={18} className="text-rose-400 flex-shrink-0" />
+                )}
                 {!selectedOption && !guessLocked && (
                   <ArrowRight
                     size={16}
@@ -223,16 +220,18 @@ const GuessForm: React.FC<GuessFormProps> = ({
           ))}
         </div>
 
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleSkip}
-            className="flex-1 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-xl flex items-center justify-center transition-colors"
-          >
-            <RefreshCw size={16} className="mr-2" />
-            <span>Skip / Next Comic</span>
-          </button>
-        </div>
+        {!guessLocked && (
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onSkip}
+              className="flex-1 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-xl flex items-center justify-center transition-colors"
+            >
+              <RefreshCw size={16} className="mr-2" />
+              <span>Skip This Comic</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
