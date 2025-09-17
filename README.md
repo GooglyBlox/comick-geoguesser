@@ -1,5 +1,8 @@
 # Comick Geoguesser
 
+> **⚠️ ARCHIVED PROJECT ⚠️**  
+> This project is no longer functional as **Comick.io has been shut down**. This repository is kept for archival purposes and code reference only.
+
 A Next.js application that uses the Comick.io API to allow the user to play a Geoguesser-esque game using Comick comics.
 
 ## Getting Started
